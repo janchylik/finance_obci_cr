@@ -233,3 +233,6 @@ Příjmy se plní téměř přesně podle upraveného rozpočtu (medián 0,99–
  (medián úpravy 1,20 u nejmenší kategorie vs. 1,10 u středních a velkých) – malý absolutní rozpočet 
  je citlivější na jednorázové nečekané příjmy či výdaje.
 */
+
+
+

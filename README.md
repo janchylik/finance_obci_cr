@@ -33,11 +33,70 @@ mart/  – předpočítané analytické pohledy (obec_rok, obec_rok_oddil)
 
 ## Klíčová zjištění
 
-**Příjmy** – struktura (daně ~64–70 %, nedaňové ~9–14 %, kapitálové ~1–4 %, transfery ~16–20 %) je napříč velikostmi obcí stabilní, ale výše daňových příjmů na obyvatele ne: nejmenší obce mají mírně nadprůměrné daňové příjmy na hlavu, největší obce (20 000+) výrazně nejvyšší – potvrzuje to efekt rozpočtového určení daní (RUD), který přerozděluje víc peněz na hlavu směrem k větším obcím (Praha je extrémní, ale efekt platí obecně).
+### Blok A – Výdaje na obyvatele podle kraje
 
-**Výdaje** – u malých obcí dominuje "Státní moc, státní správa" (provoz úřadu + odměny zastupitelstva), protože zastupitelstvo musí mít každá obec bez ohledu na velikost – náklad se s rostoucí obcí ředí pomaleji než jiné položky. U středních obcí dominuje "Bydlení, komunální služby".
+Nejvyšší výdaje na obyvatele má jednoznačně Praha, následovaná Plzeňským a Jihomoravským krajem. Rozdíl mezi nejvyšším a nejnižším krajem je zhruba 2,3×.
 
-**Plánování** – příjmy se plní téměř přesně podle upraveného rozpočtu (medián 0,99–1,02), výdaje systematicky jen z 78–84 % (typicky investice přesunuté do dalšího roku). Menší obce upravují svůj rozpočet v průběhu roku výrazněji než velké.
+| kraj | počet obcí | vážený průměr (Kč/obyv.) | pořadí |
+| :--- | ---: | ---: | ---: |
+| Hlavní město Praha | 1 | 88 684 | 1 |
+| Plzeňský kraj | 501 | 46 072 | 2 |
+| Jihomoravský kraj | 672 | 44 745 | 3 |
+| Jihočeský kraj | 623 | 44 274 | 4 |
+| Moravskoslezský kraj | 300 | 43 945 | 5 |
+| Kraj Vysočina | 704 | 43 464 | 6 |
+| Olomoucký kraj | 401 | 41 156 | 7 |
+| Karlovarský kraj | 133 | 40 839 | 8 |
+| Liberecký kraj | 215 | 40 121 | 9 |
+| Zlínský kraj | 307 | 39 782 | 10 |
+| Královéhradecký kraj | 448 | 39 571 | 11 |
+| Pardubický kraj | 451 | 38 854 | 12 |
+| Ústecký kraj | 354 | 38 278 | 13 |
+| Středočeský kraj | 1 144 | 38 180 | 14 |
+
+### Blok B – Odkud obce berou peníze
+
+Struktura příjmů (podíl daní, transferů) je napříč velikostmi obcí poměrně stabilní, ale výše daňových příjmů na obyvatele ne – nejmenší obce mají mírně nadprůměrné daňové příjmy na hlavu, největší obce (20 000+) výrazně nejvyšší. Potvrzuje to efekt rozpočtového určení daní (RUD), které přerozděluje víc peněz na hlavu směrem k větším obcím.
+
+| kategorie (počet obyvatel) | podíl daňových příjmů | podíl transferů | daňové příjmy / obyvatele |
+| :--- | ---: | ---: | ---: |
+| 1: do 199 | 64,2 % | 18,9 % | 27 037 Kč |
+| 2: 200–499 | 64,7 % | 19,9 % | 25 553 Kč |
+| 3: 500–999 | 67,1 % | 17,3 % | 25 407 Kč |
+| 4: 1 000–1 999 | 68,0 % | 16,0 % | 25 410 Kč |
+| 5: 2 000–4 999 | 68,1 % | 16,0 % | 25 339 Kč |
+| 6: 5 000–19 999 | 64,0 % | 19,9 % | 26 223 Kč |
+| 7: 20 000 a více | 70,0 % | 19,6 % | 43 645 Kč |
+
+### Blok C – Na co obce utrácejí nejvíc (top 5 oddílů, celá ČR)
+
+| oddíl | výdaje celkem | pořadí |
+| :--- | ---: | ---: |
+| Doprava | 91,1 mld. Kč | 1 |
+| Vzdělávání a školské služby | 84,5 mld. Kč | 2 |
+| Státní moc, státní správa, územní samospráva a politické strany | 82,3 mld. Kč | 3 |
+| Bydlení, komunální služby a územní rozvoj | 66,5 mld. Kč | 4 |
+| Ochrana životního prostředí | 38,6 mld. Kč | 5 |
+
+U malých obcí v detailnějším rozkladu (viz `05_analyzy.sql`, blok C) dominuje místo dopravy "Státní moc, státní správa" – provoz úřadu a odměny zastupitelstva, které musí mít každá obec bez ohledu na velikost.
+
+### Blok D – Jak přesně obce plánují rozpočet
+
+Příjmy se plní téměř přesně podle upraveného rozpočtu (medián 0,99–1,02), výdaje systematicky jen z 78–84 % (typicky investice přesunuté do dalšího roku). Menší obce zároveň upravují svůj rozpočet v průběhu roku výrazněji (medián úpravy ~1,20 u nejmenší kategorie vs. ~1,10 u středních a velkých obcí).
+
+| kategorie (počet obyvatel) | medián plnění výdajů | medián plnění příjmů | medián úpravy výdajů | medián úpravy příjmů |
+| :--- | ---: | ---: | ---: | ---: |
+| 1: do 199 | 0,78 | 0,99 | 1,20 | 1,19 |
+| 2: 200–499 | 0,81 | 0,99 | 1,18 | 1,17 |
+| 3: 500–999 | 0,79 | 1,00 | 1,16 | 1,15 |
+| 4: 1 000–1 999 | 0,78 | 1,00 | 1,13 | 1,14 |
+| 5: 2 000–4 999 | 0,81 | 1,00 | 1,10 | 1,11 |
+| 6: 5 000–19 999 | 0,84 | 1,02 | 1,11 | 1,10 |
+| 7: 20 000 a více | 0,82 | 1,02 | 1,16 | 1,09 |
+
+## Vizualizace
+
+Power BI dashboard s mapou obcí je plánovaný – zatím není součástí repozitáře, přidá se sem po dokončení.
 
 ## Jak to spustit
 
