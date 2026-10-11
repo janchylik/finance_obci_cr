@@ -227,6 +227,26 @@ WHERE LENGTH(func_area) = 2;
 
 SELECT oddil, COUNT(*) FROM dim.oddily GROUP BY oddil HAVING COUNT(*) > 1 ORDER BY oddil;
 
-SELECT * FROM dim.oddily
+SELECT * FROM dim.oddily;
 
 SELECT * FROM dim.oddily WHERE oddil IN ('34', '39') ORDER BY oddil, datefrom;
+
+-- Dim skupiny polozek: seskupeni (2 mista, napr. 61) a podseskupeni (3 mista, napr. 612)
+-- Kody se v cisleniku lisi delkou, proto jedna tabulka a v mart se joinuje dvakrat.
+DROP TABLE IF EXISTS dim.polozky_skupiny;
+CREATE TABLE dim.polozky_skupiny (
+    kod      TEXT NOT NULL,
+    nazev    TEXT NOT NULL,
+    datefrom DATE NOT NULL,
+    dateto   DATE,
+    PRIMARY KEY (kod, datefrom)
+);
+
+INSERT INTO dim.polozky_skupiny (kod, nazev, datefrom, dateto)
+SELECT
+    zcmmt_itm,
+    txtxl,
+    TO_DATE(datefrom, 'YYYYMMDD'),
+    TO_DATE(dateto, 'YYYYMMDD')
+FROM stg.ciselnik_polozky
+WHERE LENGTH(zcmmt_itm) IN (2, 3);

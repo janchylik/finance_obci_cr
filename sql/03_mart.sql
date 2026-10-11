@@ -105,26 +105,51 @@ LIMIT 10;
 
 
 
--- Výdaje obce po paragrafech (s oddílem), bez konsolidačních položek
-CREATE OR REPLACE VIEW mart.obec_rok_paragraf AS
+-- Vydaje obce po paragrafech a polozkach (nejhlubsi uroven FinM201), bez konsolidacnich polozek
+-- Zrnitost: obec x rok x paragraf x polozka
+DROP VIEW IF EXISTS mart.obec_rok_paragraf;
+
+CREATE VIEW mart.obec_rok_paragraf AS
 SELECT
     r.zc_ico,
     r.rok,
-    LEFT(r.paragraf, 2)        AS oddil,
-    od.nazev                   AS nazev_oddilu,
+    LEFT(r.paragraf, 2) AS oddil,
+    od.nazev            AS nazev_oddilu,
     r.paragraf,
-    par.nazev                  AS nazev_paragrafu,
+    par.nazev           AS nazev_paragrafu,
+    CASE LEFT(r.polozka, 1)
+        WHEN '5' THEN 'Běžné výdaje'
+        WHEN '6' THEN 'Kapitálové výdaje'
+    END                 AS druh_vydaje,
+    LEFT(r.polozka, 2)  AS seskupeni,
+    ses.nazev           AS nazev_seskupeni,
+    LEFT(r.polozka, 3)  AS podseskupeni,
+    pod.nazev           AS nazev_podseskupeni,
+    r.polozka,
+    pol.nazev           AS nazev_polozky,
     SUM(r.skutecnost_rozpocet) AS vydaje_paragraf
 FROM fact.rozpocet r
 LEFT JOIN dim.oddily od
-    ON LEFT(r.paragraf, 2) = od.oddil
-   AND make_date(r.rok, 1, 1) BETWEEN od.datefrom AND od.dateto
+       ON LEFT(r.paragraf, 2) = od.oddil
+      AND make_date(r.rok,1,1) BETWEEN od.datefrom AND od.dateto
 LEFT JOIN dim.paragrafy par
-    ON r.paragraf = par.paragraf
-   AND make_date(r.rok, 1, 1) BETWEEN par.datefrom AND par.dateto
-WHERE NOT r.konsolidacni AND r.typ = 'vydaj'
-GROUP BY r.zc_ico, r.rok, LEFT(r.paragraf, 2), od.nazev, r.paragraf, par.nazev;
-
+       ON r.paragraf = par.paragraf
+      AND make_date(r.rok,1,1) BETWEEN par.datefrom AND par.dateto
+LEFT JOIN dim.polozky_skupiny ses
+       ON LEFT(r.polozka, 2) = ses.kod
+      AND make_date(r.rok,1,1) BETWEEN ses.datefrom AND ses.dateto
+LEFT JOIN dim.polozky_skupiny pod
+       ON LEFT(r.polozka, 3) = pod.kod
+      AND make_date(r.rok,1,1) BETWEEN pod.datefrom AND pod.dateto
+LEFT JOIN dim.polozky pol
+       ON r.polozka = pol.polozka
+      AND make_date(r.rok,1,1) BETWEEN pol.datefrom AND pol.dateto
+WHERE NOT r.konsolidacni
+  AND r.typ = 'vydaj'
+GROUP BY r.zc_ico, r.rok, LEFT(r.paragraf, 2), od.nazev, r.paragraf, par.nazev,
+         LEFT(r.polozka, 1), LEFT(r.polozka, 2), ses.nazev,
+         LEFT(r.polozka, 3), pod.nazev,
+         r.polozka, pol.nazev;
 
 -- Příjmy obce po položkách (s třídou), bez konsolidačních položek
 CREATE OR REPLACE VIEW mart.obec_rok_polozka AS
@@ -147,3 +172,5 @@ LEFT JOIN dim.polozky pol
    AND make_date(r.rok, 1, 1) BETWEEN pol.datefrom AND pol.dateto
 WHERE NOT r.konsolidacni AND r.typ = 'prijem'
 GROUP BY r.zc_ico, r.rok, LEFT(r.polozka, 1), r.polozka, pol.nazev;
+
+
