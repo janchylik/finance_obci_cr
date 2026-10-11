@@ -141,3 +141,28 @@ JOIN soucet_oddily s ON m.zc_ico = s.zc_ico AND m.rok = s.rok
 WHERE m.rok = 2025
 ORDER BY ABS((m.vydaje_bezne + m.vydaje_kapitalove) - s.vydaje_z_oddilu) DESC
 LIMIT 10;
+
+
+
+-- Výdaje: součet paragrafů = výdaje v mart.obec_rok
+SELECT COUNT(*) AS obci_s_rozdilem_vydaje
+FROM mart.obec_rok m
+LEFT JOIN (SELECT zc_ico, rok, SUM(vydaje_paragraf) AS v
+           FROM mart.obec_rok_paragraf GROUP BY zc_ico, rok) p
+       ON m.zc_ico = p.zc_ico AND m.rok = p.rok
+WHERE ABS((m.vydaje_bezne + m.vydaje_kapitalove) - COALESCE(p.v, 0)) > 1;
+
+-- Příjmy: součet položek = příjmy v mart.obec_rok
+SELECT COUNT(*) AS obci_s_rozdilem_prijmy
+FROM mart.obec_rok m
+LEFT JOIN (SELECT zc_ico, rok, SUM(prijmy_polozka) AS p
+           FROM mart.obec_rok_polozka GROUP BY zc_ico, rok) x
+       ON m.zc_ico = x.zc_ico AND m.rok = x.rok
+WHERE ABS(m.prijmy_skutecnost - COALESCE(x.p, 0)) > 1;
+
+-- Chybějící názvy (selhal časový join na číselník)
+SELECT
+    (SELECT COUNT(*) FROM mart.obec_rok_paragraf
+      WHERE nazev_paragrafu IS NULL OR nazev_oddilu IS NULL) AS bez_nazvu_vydaje,
+    (SELECT COUNT(*) FROM mart.obec_rok_polozka
+      WHERE nazev_polozky IS NULL OR nazev_tridy IS NULL)    AS bez_nazvu_prijmy;

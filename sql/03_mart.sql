@@ -102,3 +102,48 @@ JOIN soucet_oddily s ON m.zc_ico = s.zc_ico AND m.rok = s.rok
 WHERE m.rok = 2025
 ORDER BY ABS((m.vydaje_bezne + m.vydaje_kapitalove) - s.vydaje_z_oddilu) DESC
 LIMIT 10;
+
+
+
+-- Výdaje obce po paragrafech (s oddílem), bez konsolidačních položek
+CREATE OR REPLACE VIEW mart.obec_rok_paragraf AS
+SELECT
+    r.zc_ico,
+    r.rok,
+    LEFT(r.paragraf, 2)        AS oddil,
+    od.nazev                   AS nazev_oddilu,
+    r.paragraf,
+    par.nazev                  AS nazev_paragrafu,
+    SUM(r.skutecnost_rozpocet) AS vydaje_paragraf
+FROM fact.rozpocet r
+LEFT JOIN dim.oddily od
+    ON LEFT(r.paragraf, 2) = od.oddil
+   AND make_date(r.rok, 1, 1) BETWEEN od.datefrom AND od.dateto
+LEFT JOIN dim.paragrafy par
+    ON r.paragraf = par.paragraf
+   AND make_date(r.rok, 1, 1) BETWEEN par.datefrom AND par.dateto
+WHERE NOT r.konsolidacni AND r.typ = 'vydaj'
+GROUP BY r.zc_ico, r.rok, LEFT(r.paragraf, 2), od.nazev, r.paragraf, par.nazev;
+
+
+-- Příjmy obce po položkách (s třídou), bez konsolidačních položek
+CREATE OR REPLACE VIEW mart.obec_rok_polozka AS
+SELECT
+    r.zc_ico,
+    r.rok,
+    LEFT(r.polozka, 1) AS trida,
+    CASE LEFT(r.polozka, 1)
+        WHEN '1' THEN 'Daňové příjmy'
+        WHEN '2' THEN 'Nedaňové příjmy'
+        WHEN '3' THEN 'Kapitálové příjmy'
+        WHEN '4' THEN 'Přijaté transfery'
+    END                AS nazev_tridy,
+    r.polozka,
+    pol.nazev          AS nazev_polozky,
+    SUM(r.skutecnost_rozpocet) AS prijmy_polozka
+FROM fact.rozpocet r
+LEFT JOIN dim.polozky pol
+    ON r.polozka = pol.polozka
+   AND make_date(r.rok, 1, 1) BETWEEN pol.datefrom AND pol.dateto
+WHERE NOT r.konsolidacni AND r.typ = 'prijem'
+GROUP BY r.zc_ico, r.rok, LEFT(r.polozka, 1), r.polozka, pol.nazev;
